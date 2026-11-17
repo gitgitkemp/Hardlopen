@@ -48,13 +48,13 @@ function voortgang(el, acts) {
       <div><span>Vorige week</span><b>${fmtKm(prev.dist, 1)} km</b></div>
       <div><span>Gem. 4 weken</span><b>${fmtKm(avg4, 1)} km</b></div>
     </div>
-    ${avg4 > 0 && cur.dist > avg4 * 1.3 ? '<p class="warn small">⚠ Je loopt deze week flink meer dan je 4-weeks gemiddelde. Pas op voor blessures (10% regel).</p>' : ''}
+    ${avg4 > 0 && cur.dist > avg4 * 1.3 ? '<p class="warn small">Let op: je loopt deze week flink meer dan je 4-weeks gemiddelde. Pas op voor blessures (10% regel).</p>' : ''}
   </section>
   <section class="card"><h3>Per maand</h3><div id="mo-chart"></div></section>
   <section class="card"><h3>Doelen</h3>
     <div class="goal"><div class="row between"><span>Week</span><b>${fmtKm(cur.dist, 1)} / ${s.weeklyGoalKm} km</b></div><div class="mini-bar"><i style="width:${Math.min(100, cur.dist / s.weeklyGoalKm / 10)}%"></i></div></div>
     ${(() => { const y0 = new Date(new Date().getFullYear(), 0, 1).getTime(); const yd = acts.filter(a => a.start >= y0).reduce((t, a) => t + a.stats.distance, 0); return `<div class="goal"><div class="row between"><span>Jaar</span><b>${fmtKm(yd, 0)} / ${s.yearGoalKm} km</b></div><div class="mini-bar"><i style="width:${Math.min(100, yd / s.yearGoalKm / 10)}%"></i></div></div>`; })()}
-    <a href="#/profiel" class="small">Doelen aanpassen →</a>
+    <a href="#/profiel" class="small">Doelen aanpassen</a>
   </section>
   <section class="card"><h3>Totalen</h3>
     <div class="stat-grid">
@@ -95,10 +95,10 @@ function fitheid(el, acts) {
   </section>
   <section class="card"><h3>Hoe werkt dit?</h3><p class="muted small">Elke run krijgt een belastingsscore (relatieve inspanning) op basis van je hartslag, of anders je tempo ten opzichte van je drempeltempo. Fitheid is het langetermijngemiddelde, vermoeidheid het kortetermijngemiddelde. Vorm is het verschil: negatief betekent je bouwt op, positief betekent je bent fris.</p></section>`;
   const xf = t => fmtShortDate(t);
-  lineChart($('#f-ctl'), { data: ser.map(d => ({ x: d.t, y: d.ctl })), color: '#3fa7ff', xFmt: xf, height: 120 });
-  lineChart($('#f-atl'), { data: ser.map(d => ({ x: d.t, y: d.atl })), color: '#ff8a3d', xFmt: xf, height: 100 });
-  lineChart($('#f-tsb'), { data: ser.map(d => ({ x: d.t, y: d.tsb })), color: '#c6ff3d', xFmt: xf, height: 100, fill: false, refLines: [{ y: 0, color: '#ffffff44' }] });
-  lineChart($('#f-load'), { data: ser.map(d => ({ x: d.t, y: d.load })), color: '#b93dff', xFmt: xf, height: 90 });
+  lineChart($('#f-ctl'), { data: ser.map(d => ({ x: d.t, y: d.ctl })), color: '#7d9fbd', xFmt: xf, height: 120 });
+  lineChart($('#f-atl'), { data: ser.map(d => ({ x: d.t, y: d.atl })), color: '#d0804a', xFmt: xf, height: 100 });
+  lineChart($('#f-tsb'), { data: ser.map(d => ({ x: d.t, y: d.tsb })), color: '#e8a33a', xFmt: xf, height: 100, fill: false, refLines: [{ y: 0, color: '#ffffff44' }] });
+  lineChart($('#f-load'), { data: ser.map(d => ({ x: d.t, y: d.load })), color: '#9b7bb0', xFmt: xf, height: 90 });
   $$('#fd button').forEach(b => b.onclick = () => { localStorage.setItem('tempo.fitDays', b.dataset.d); fitheid(el, acts); });
 }
 
@@ -113,7 +113,7 @@ function records(el, acts) {
   el.innerHTML = `
   <section class="card"><h3>Persoonlijke records</h3>
     ${rows.length ? rows.map(r => `<div class="pr-block"><div class="row between"><b>${r.label}</b><span class="pr-time">${fmtTime(r.list[0].t)}</span></div>
-      ${r.list.map((x, i) => `<a class="pr-row" href="#/activiteit/${x.a.id}"><span>${['🥇', '🥈', '🥉'][i]} ${fmtTime(x.t)}</span><span>${fmtPace(x.t / (r.d / 1000))} /km</span><span>${fmtShortDate(x.a.start)} ${new Date(x.a.start).getFullYear()}</span></a>`).join('')}</div>`).join('') : '<p class="muted">Nog geen records. Ga lopen!</p>'}
+      ${r.list.map((x, i) => `<a class="pr-row" href="#/activiteit/${x.a.id}"><span><i class="rank">${i + 1}</i>${fmtTime(x.t)}</span><span>${fmtPace(x.t / (r.d / 1000))} /km</span><span>${fmtShortDate(x.a.start)} ${new Date(x.a.start).getFullYear()}</span></a>`).join('')}</div>`).join('') : '<p class="muted">Nog geen records. Ga lopen!</p>'}
   </section>
   <section class="card"><h3>Voorspelde racetijden</h3>
     ${vd ? `<p class="muted small">Op basis van je beste prestatie van de laatste 90 dagen (${esc(BEST_EFFORTS.find(b => b[0] === src.dist)?.[1])} op ${fmtShortDate(src.act.start)}). Geschatte VO2max (VDOT): <b>${fmtNum(vd, 1)}</b></p>
@@ -152,7 +152,7 @@ function kalender(el, acts, q) {
     const isToday = startOfDay(Date.now()) === day;
     cells.push(`<${list.length ? `a href="#/activiteit/${list[0].id}"` : 'div'} class="cal-cell ${isToday ? 'today' : ''} ${ps ? 'planned' : ''}">
       <span class="cal-d">${d}</span>
-      ${dist ? `<i class="cal-dot" style="--s:${0.35 + 0.65 * dist / maxD}"></i><span class="cal-km">${fmtNum(dist / 1000, 1)}</span>` : ps && !ps.done ? `<span class="cal-plan" title="${esc(ps.title)}">${ps.type === 'race' ? '🏁' : '○'}</span>` : ''}
+      ${dist ? `<i class="cal-dot" style="--s:${0.35 + 0.65 * dist / maxD}"></i><span class="cal-km">${fmtNum(dist / 1000, 1)}</span>` : ps && !ps.done ? `<span class="cal-plan" title="${esc(ps.title)}">${ps.type === 'race' ? 'R' : '·'}</span>` : ''}
     </${list.length ? 'a' : 'div'}>`);
   }
   const prevM = m === 0 ? `${y - 1}-11` : `${y}-${m - 1}`;
@@ -208,7 +208,7 @@ function schema(el, acts) {
       p.vdot = vd;
       p.target = tgt || null;
       saveSettings({ plan: p });
-      toast('Schema aangemaakt 💪');
+      toast('Schema aangemaakt');
       schema(el, acts);
     };
     return;

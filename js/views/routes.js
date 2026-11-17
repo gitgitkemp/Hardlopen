@@ -12,7 +12,7 @@ import { presetRoute } from './record.js';
 const TABS = [['lijst', 'Mijn routes'], ['planner', 'Planner'], ['heatmap', 'Heatmap'], ['segmenten', 'Segmenten']];
 
 export async function renderRoutes(view, tab = 'lijst', q) {
-  view.innerHTML = `<header class="top"><h1>Routes</h1><button class="icon-btn" id="r-imp" title="GPX importeren">⤓</button></header>
+  view.innerHTML = `<header class="top"><h1>Routes</h1><button class="icon-btn" id="r-imp" title="GPX importeren">Import</button></header>
     <nav class="tabs">${TABS.map(([k, l]) => `<a href="#/routes/${k}" class="${k === tab ? 'on' : ''}">${l}</a>`).join('')}</nav>
     <div id="r-body"></div>`;
   $('#r-imp').onclick = () => importFiles();
@@ -26,10 +26,10 @@ async function lijst(el, q) {
   const vd = currentVdot(acts).vdot;
   const openId = q?.get('id');
   el.innerHTML = routes.length ? routes.map(r => `<div class="card route-card ${r.id === openId ? 'open' : ''}" data-id="${r.id}">
-      <div class="row between"><div><b>${esc(r.name)}</b><p class="muted small">${fmtKm(r.distance)} km${r.elevGain ? ` · ↑${r.elevGain} m` : ''}${vd ? ` · ~${fmtTime(predictTime(vd, r.distance) * 1.15)} rustig` : ''}</p></div>${routeSvg(r.path, 90, 60, '#3fa7ff')}</div>
+      <div class="row between"><div><b>${esc(r.name)}</b><p class="muted small">${fmtKm(r.distance)} km${r.elevGain ? ` · ↑${r.elevGain} m` : ''}${vd ? ` · ~${fmtTime(predictTime(vd, r.distance) * 1.15)} rustig` : ''}</p></div>${routeSvg(r.path, 90, 60, '#7d9fbd')}</div>
       <div class="route-detail" ${r.id === openId ? '' : 'hidden'}><div class="route-map" id="rm-${r.id}"></div><div class="chart-box" id="re-${r.id}"></div>
       <div class="row gap wrap"><a class="btn primary" href="#/rennen" data-run="${r.id}">Lopen</a><button class="btn ghost" data-gpx="${r.id}">GPX</button><button class="btn ghost danger" data-del="${r.id}">Verwijderen</button></div></div>
-    </div>`).join('') : `<div class="empty"><div class="empty-ico">🗺</div><p>Nog geen routes. Plan er een in de planner, importeer een GPX of sla een run op als route.</p><a class="btn primary" href="#/routes/planner">Route plannen</a></div>`;
+    </div>`).join('') : `<div class="empty"><p>Nog geen routes. Plan er een in de planner, importeer een GPX of sla een run op als route.</p><a class="btn primary" href="#/routes/planner">Route plannen</a></div>`;
   const maps = [];
   $$('.route-card').forEach(c => c.addEventListener('click', e => {
     if (e.target.closest('button,a')) return;
@@ -39,14 +39,14 @@ async function lijst(el, q) {
       const r = routes.find(x => x.id === c.dataset.id);
       c._map = createMap($(`#rm-${r.id}`, c));
       if (c._map) {
-        const pl = L.polyline(latlngs(r.path), { color: '#3fa7ff', weight: 5 }).addTo(c._map);
+        const pl = L.polyline(latlngs(r.path), { color: '#7d9fbd', weight: 5 }).addTo(c._map);
         startEndMarkers(c._map, r.path);
         c._map.fitBounds(pl.getBounds(), { padding: [20, 20] });
         maps.push(c._map);
       }
       if (r.path.some(p => p.ele != null)) {
         let d = 0;
-        lineChart($(`#re-${r.id}`, c), { data: r.path.map((p, i) => { if (i) d += haversine(r.path[i - 1], p); return { x: d / 1000, y: p.ele }; }), color: '#9aa7b5', unit: 'm', xFmt: v => `${v.toFixed(1)} km`, height: 90 });
+        lineChart($(`#re-${r.id}`, c), { data: r.path.map((p, i) => { if (i) d += haversine(r.path[i - 1], p); return { x: d / 1000, y: p.ele }; }), color: '#8d8a82', unit: 'm', xFmt: v => `${v.toFixed(1)} km`, height: 90 });
       }
     }
   }));
@@ -64,9 +64,9 @@ async function planner(el) {
       <div class="pl-stats"><b id="pl-dist">0,00 km</b><span class="muted small" id="pl-hint">Tik op de kaart om punten toe te voegen</span></div>
       <div class="row gap wrap">
         <label class="check small"><input type="checkbox" id="pl-snap" checked> Volg paden</label>
-        <button class="btn ghost small" id="pl-undo">↶ Ongedaan</button>
-        <button class="btn ghost small" id="pl-loop">⟲ Terug naar start</button>
-        <button class="btn ghost small" id="pl-rev">⇄ Omdraaien</button>
+        <button class="btn ghost small" id="pl-undo">Ongedaan</button>
+        <button class="btn ghost small" id="pl-loop">Terug naar start</button>
+        <button class="btn ghost small" id="pl-rev">Omdraaien</button>
         <button class="btn ghost small" id="pl-clear">Wissen</button>
       </div>
       <div class="row gap"><input id="pl-name" placeholder="Naam van de route" class="grow"><button class="btn primary" id="pl-save">Opslaan</button></div>
@@ -76,7 +76,7 @@ async function planner(el) {
   navigator.geolocation?.getCurrentPosition(p => map.setView([p.coords.latitude, p.coords.longitude], 15), () => {}, { timeout: 8000 });
   const waypoints = []; // {lat, lon}
   const legs = []; // array van paden tussen waypoints
-  const line = L.polyline([], { color: '#3fa7ff', weight: 5 }).addTo(map);
+  const line = L.polyline([], { color: '#7d9fbd', weight: 5 }).addTo(map);
   const markers = L.layerGroup().addTo(map);
   const path = () => {
     const out = [];
@@ -145,8 +145,8 @@ async function heatmap(el) {
     list.forEach(a => {
       const ll = latlngs(a.points.filter((_, i) => i % 3 === 0));
       bounds.push(...ll);
-      L.polyline(ll, { color: '#ff5a3d', weight: 3, opacity: Math.max(0.12, Math.min(0.6, 4 / list.length)) }).addTo(layer);
-      L.polyline(ll, { color: '#ffd23f', weight: 1, opacity: Math.max(0.08, Math.min(0.4, 2 / list.length)) }).addTo(layer);
+      L.polyline(ll, { color: '#e8a33a', weight: 3, opacity: Math.max(0.12, Math.min(0.6, 4 / list.length)) }).addTo(layer);
+      L.polyline(ll, { color: '#d9b44a', weight: 1, opacity: Math.max(0.08, Math.min(0.4, 2 / list.length)) }).addTo(layer);
     });
     if (bounds.length) map.fitBounds(bounds, { padding: [20, 20] });
   };
@@ -160,9 +160,9 @@ async function segmenten(el) {
   const acts = await activities();
   el.innerHTML = segs.length ? segs.map(sg => {
     const efforts = acts.map(a => segmentEffort(sg, a)).filter(Boolean).sort((a, b) => a.time - b.time);
-    return `<section class="card"><div class="row between"><div><b>${esc(sg.name)}</b><p class="muted small">${fmtKm(sg.distance)} km · ${efforts.length} pogingen</p></div>${routeSvg(sg.path, 80, 50, '#ff8a3d')}</div>
-      <div class="effort-list">${efforts.slice(0, 10).map((e, i) => `<a class="effort-row" href="#/activiteit/${e.actId}"><span>${i === 0 ? '👑' : `${i + 1}.`} ${fmtShortDate(e.start)} ${new Date(e.start).getFullYear()}</span><b>${fmtTime(e.time)}</b><em>${fmtTime(e.time / (sg.distance / 1000))} /km</em></a>`).join('') || '<p class="muted small">Nog geen pogingen</p>'}</div>
+    return `<section class="card"><div class="row between"><div><b>${esc(sg.name)}</b><p class="muted small">${fmtKm(sg.distance)} km · ${efforts.length} pogingen</p></div>${routeSvg(sg.path, 80, 50, '#d0804a')}</div>
+      <div class="effort-list">${efforts.slice(0, 10).map((e, i) => `<a class="effort-row" href="#/activiteit/${e.actId}"><span><i class="rank">${i + 1}</i>${fmtShortDate(e.start)} ${new Date(e.start).getFullYear()}</span><b>${fmtTime(e.time)}</b><em>${fmtTime(e.time / (sg.distance / 1000))} /km</em></a>`).join('') || '<p class="muted small">Nog geen pogingen</p>'}</div>
       <button class="btn ghost small danger" data-del="${sg.id}">Verwijderen</button></section>`;
-  }).join('') : `<div class="empty"><div class="empty-ico">📍</div><p>Nog geen segmenten. Open een run, tik op ⋯ en kies "Segment maken". Daarna zie je bij elke run op dat stuk je tijd en ranking.</p></div>`;
+  }).join('') : `<div class="empty"><p>Nog geen segmenten. Open een run, tik op ⋯ en kies "Segment maken". Daarna zie je bij elke run op dat stuk je tijd en ranking.</p></div>`;
   $$('[data-del]').forEach(b => b.onclick = async () => { if (await confirmDialog('Segment verwijderen?', 'Verwijderen', true)) { await db.del('segments', b.dataset.del); segmenten(el); } });
 }

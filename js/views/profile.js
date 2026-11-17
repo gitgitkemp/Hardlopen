@@ -11,7 +11,7 @@ export function renderProfile(view) {
   view.innerHTML = `<header class="top"><h1>Profiel</h1></header>
 
   <section class="card strava-setup">
-    <div class="row between"><h3><span class="badge strava">S</span> Strava</h3>${strava.isConnected() ? '<span class="ok">Gekoppeld ✓</span>' : ''}</div>
+    <div class="row between"><h3>Strava</h3>${strava.isConnected() ? '<span class="ok">Gekoppeld</span>' : ''}</div>
     ${strava.isConnected() ? `
       <p>Ingelogd als <b>${esc(st.athlete?.name || 'Strava atleet')}</b></p>
       <label class="check"><input type="checkbox" id="st-auto" ${st.autoUpload ? 'checked' : ''}> Runs standaard delen op Strava na opslaan</label>
@@ -75,7 +75,7 @@ export function renderProfile(view) {
 
   <section class="card"><h3>Schoenen</h3>
     <div id="shoes">${s.shoes.map(sh => `<div class="list-row"><span>${esc(sh.name)}${sh.id === s.defaultShoe ? ' <em class="tag">standaard</em>' : ''}${sh.retired ? ' <em class="muted">(met pensioen)</em>' : ''}</span>
-      <span class="row gap"><button class="btn ghost small" data-def="${sh.id}">★</button><button class="btn ghost small" data-ret="${sh.id}">${sh.retired ? 'Activeren' : 'Pensioen'}</button></span></div>`).join('') || '<p class="muted small">Houd kilometers per paar bij zodat je weet wanneer ze vervangen moeten worden.</p>'}</div>
+      <span class="row gap"><button class="btn ghost small" data-def="${sh.id}">Standaard</button><button class="btn ghost small" data-ret="${sh.id}">${sh.retired ? 'Activeren' : 'Pensioen'}</button></span></div>`).join('') || '<p class="muted small">Houd kilometers per paar bij zodat je weet wanneer ze vervangen moeten worden.</p>'}</div>
     <div class="row gap"><input id="sh-name" placeholder="bijv. Nike Pegasus 41" class="grow"><input id="sh-limit" type="number" value="700" style="width:80px" title="Max km"><button class="btn ghost" id="sh-add">+</button></div>
   </section>
 
@@ -88,7 +88,7 @@ export function renderProfile(view) {
     </div>
     <p class="muted small">Alle data staat lokaal op je telefoon. Maak af en toe een backup.</p>
   </section>
-  <p class="muted small center">Tempo · hardloop app</p>`;
+  <p class="muted small center mono">TEMPO / v1</p>`;
 
   // Instellingen opslaan bij wijziging
   $$('[data-k]').forEach(inp => inp.addEventListener('change', () => {

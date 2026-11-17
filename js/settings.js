@@ -78,4 +78,4 @@ export function paceZoneOf(pace, s = settings()) {
   return 6;
 }
 
-export const ZONE_COLORS = ['#5b6b7c', '#3fa7ff', '#3ddc84', '#ffd23f', '#ff8a3d', '#ff3d5a', '#b93dff'];
+export const ZONE_COLORS = ['#55534e', '#7d9fbd', '#7fae86', '#d9b44a', '#d0804a', '#cf5a4c', '#9b7bb0'];

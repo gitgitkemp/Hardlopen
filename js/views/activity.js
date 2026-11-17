@@ -69,7 +69,7 @@ export async function renderActivity(view, id, q) {
   <section class="card strava-card" id="a-strava"></section>
 
   <section class="card">
-    <h3>Relatieve inspanning <span class="info" title="Trainingsbelasting op basis van hartslag (TRIMP) of tempo t.o.v. drempel">ⓘ</span></h3>
+    <h3>Relatieve inspanning </h3>
     <div class="effort"><b>${rel}</b><span>${relLabel}</span><div class="effort-bar"><i style="width:${Math.min(100, rel / 2.5)}%"></i></div></div>
     <p class="muted small" id="a-effort-cmp"></p>
   </section>
@@ -99,7 +99,7 @@ export async function renderActivity(view, id, q) {
   </div></section>` : ''}
 
   ${effortRows.length ? `<section class="card"><h3>Beste prestaties</h3>
-    <div class="effort-list">${effortRows.map(e => `<div class="effort-row"><span>${e.rank <= 3 ? ['🥇', '🥈', '🥉'][e.rank - 1] : ''} ${e.label}</span><b>${fmtTime(e.t)}</b><em>${e.rank === 1 ? 'Persoonlijk record' : e.rank <= 3 ? `${e.rank}e snelste ooit` : ''}</em></div>`).join('')}</div>
+    <div class="effort-list">${effortRows.map(e => `<div class="effort-row"><span>${e.rank <= 3 ? `<i class="rank">${e.rank}</i>` : ''}${e.label}</span><b>${fmtTime(e.t)}</b><em>${e.rank === 1 ? 'Persoonlijk record' : e.rank <= 3 ? `${e.rank}e snelste ooit` : ''}</em></div>`).join('')}</div>
   </section>` : ''}
 
   ${hasHr ? `<section class="card"><h3>Hartslagzones</h3><div id="z-hr"></div></section>` : ''}
@@ -141,9 +141,9 @@ export async function renderActivity(view, id, q) {
   const paceVals = ps.map(p => p.pace).filter(Boolean).sort((a, b) => a - b);
   const pMax = paceVals[Math.floor(paceVals.length * 0.97)] || 600;
   mk('#c-pace', ps.map(p => ({ x: p.d / 1000, y: p.pace && p.pace <= pMax * 1.05 ? p.pace : null })), { invert: true, yFmt: fmtPace, unit: '/km', refLines: [{ y: st.avgPace, color: '#ffffff55' }] });
-  mk('#c-hr', pts.map(p => ({ x: p.d / 1000, y: p.hr || null })), { color: '#ff3d5a', unit: 'bpm', refLines: hrZones().slice(1).map((z, i) => ({ y: z.min, color: ZONE_COLORS[i + 2] + '66' })) });
-  mk('#c-ele', pts.map(p => ({ x: p.d / 1000, y: p.ele })), { color: '#9aa7b5', unit: 'm' });
-  mk('#c-cad', pts.map(p => ({ x: p.d / 1000, y: p.cad || null })), { color: '#b93dff', unit: 'spm' });
+  mk('#c-hr', pts.map(p => ({ x: p.d / 1000, y: p.hr || null })), { color: '#cf5a4c', unit: 'bpm', refLines: hrZones().slice(1).map((z, i) => ({ y: z.min, color: ZONE_COLORS[i + 2] + '66' })) });
+  mk('#c-ele', pts.map(p => ({ x: p.d / 1000, y: p.ele })), { color: '#8d8a82', unit: 'm' });
+  mk('#c-cad', pts.map(p => ({ x: p.d / 1000, y: p.cad || null })), { color: '#9b7bb0', unit: 'spm' });
 
   // --- Zones ---
   if (hasHr) zoneBars($('#z-hr'), zoneTimes(pts, 'hr'), hrZones().map(z => ({ ...z, range: `${z.min}-${z.max}` })), ZONE_COLORS, fmtTime);
@@ -162,7 +162,7 @@ export async function renderActivity(view, id, q) {
       const matches = matchedRuns(act, acts);
       if (matches.length > 1) {
         $('#a-matched').hidden = false;
-        barChart($('#m-chart'), matches.slice(-10).map(a => ({ label: fmtShortDate(a.start), value: 1800 - Math.min(1800, a.stats.avgPace), color: a.id === act.id ? 'var(--accent)' : 'var(--bar)', title: fmtPace(a.stats.avgPace) })), { fmt: v => fmtPace(1800 - v), highlightLast: false });
+        barChart($('#m-chart'), matches.slice(-10).map(a => ({ label: `${new Date(a.start).getDate()}/${new Date(a.start).getMonth() + 1}`, value: 1800 - Math.min(1800, a.stats.avgPace), color: a.id === act.id ? 'var(--accent)' : 'var(--bar)', title: fmtPace(a.stats.avgPace) })), { fmt: v => fmtPace(1800 - v), highlightLast: false });
         const best = matches.reduce((b, a) => a.stats.movingTime < b.stats.movingTime ? a : b);
         $('#m-list').innerHTML = `<p class="muted small">${matches.length} keer gelopen. Snelste: ${fmtTime(best.stats.movingTime)} op ${fmtShortDate(best.start)}${best.id === act.id ? ' (deze run!)' : ''}.</p>`;
       }
@@ -177,7 +177,7 @@ export async function renderActivity(view, id, q) {
     $('#seg-list').innerHTML = segRows.map(({ sg, e }) => {
       const all = acts.map(a => segmentEffort(sg, a)).filter(Boolean).sort((a, b) => a.time - b.time);
       const rank = all.findIndex(x => x.actId === act.id) + 1;
-      return `<div class="effort-row"><span>${rank === 1 ? '👑' : ''} ${esc(sg.name)}</span><b>${fmtTime(e.time)}</b><em>${rank}/${all.length}</em></div>`;
+      return `<div class="effort-row"><span>${rank === 1 ? '<i class="rank">1</i>' : ''}${esc(sg.name)}</span><b>${fmtTime(e.time)}</b><em>${rank}/${all.length}</em></div>`;
     }).join('');
   }
 
@@ -185,7 +185,7 @@ export async function renderActivity(view, id, q) {
   const renderStrava = () => {
     const el = $('#a-strava');
     if (act.stravaId) {
-      el.innerHTML = `<div class="row between"><div><b>Op Strava</b><p class="muted small">Gedeeld met je volgers</p></div><a class="btn strava-btn" href="${strava.activityUrl(act.stravaId)}" target="_blank" rel="noopener">Bekijk op Strava ↗</a></div>`;
+      el.innerHTML = `<div class="row between"><div><b>Op Strava</b><p class="muted small">Gedeeld met je volgers</p></div><a class="btn strava-btn" href="${strava.activityUrl(act.stravaId)}" target="_blank" rel="noopener">Bekijk op Strava</a></div>`;
     } else if (strava.isConnected()) {
       el.innerHTML = `<div class="row between"><div><b>Delen met vrienden</b><p class="muted small" id="sv-status">Upload naar je Strava account</p></div><button class="btn strava-btn" id="sv-up">Upload naar Strava</button></div>`;
       $('#sv-up').onclick = doUpload;
@@ -203,7 +203,7 @@ export async function renderActivity(view, id, q) {
       act.stravaId = sid;
       act.stravaUploadedAt = Date.now();
       await saveActivity(act);
-      toast('Gedeeld op Strava! 🚀');
+      toast('Gedeeld op Strava');
       renderStrava();
     } catch (e) {
       toast(e.message, 5000);
@@ -217,15 +217,15 @@ export async function renderActivity(view, id, q) {
   // --- Menu ---
   $('#a-menu').onclick = () => {
     const close = modal(`<div class="menu">
-      <button data-a="edit">✏️ Bewerken</button>
-      <button data-a="share">📸 Deelafbeelding maken</button>
-      <button data-a="gpx">⬇ Exporteer GPX</button>
-      <button data-a="tcx">⬇ Exporteer TCX (met hartslag/cadans)</button>
-      ${hasGps && navigator.onLine ? '<button data-a="elev">⛰ Hoogte corrigeren</button>' : ''}
-      ${hasGps ? '<button data-a="segment">📍 Segment maken van deel van deze run</button>' : ''}
-      ${hasGps ? '<button data-a="route">🗺 Opslaan als route</button>' : ''}
+      <button data-a="edit">Bewerken</button>
+      <button data-a="share">Deelafbeelding maken</button>
+      <button data-a="gpx">Exporteer GPX</button>
+      <button data-a="tcx">Exporteer TCX <small>met hartslag en cadans</small></button>
+      ${hasGps && navigator.onLine ? '<button data-a="elev">Hoogte corrigeren</button>' : ''}
+      ${hasGps ? '<button data-a="segment">Segment maken</button>' : ''}
+      ${hasGps ? '<button data-a="route">Opslaan als route</button>' : ''}
       ${act.stravaId ? '<button data-a="unlink">Strava koppeling loshalen</button>' : ''}
-      <button data-a="delete" class="danger">🗑 Verwijderen</button>
+      <button data-a="delete" class="danger">Verwijderen</button>
       <button data-close>Annuleren</button></div>`, {
       onMount: (m) => $$('[data-a]', m).forEach(b => b.onclick = async () => {
         close();
@@ -293,12 +293,13 @@ function segmentDialog(act) {
 
 // Deelafbeelding (1080x1350) met route en stats
 async function shareImage(act) {
+  await document.fonts?.load('600 40px "IBM Plex Mono"').catch(() => {});
   const W = 1080, H = 1350;
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
   const g = c.getContext('2d');
   const grad = g.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#11151c'); grad.addColorStop(1, '#05070a');
+  grad.addColorStop(0, '#141412'); grad.addColorStop(1, '#0b0b0a');
   g.fillStyle = grad; g.fillRect(0, 0, W, H);
   const pts = act.points.filter(p => p.lat != null);
   if (pts.length > 1) {
@@ -310,18 +311,16 @@ async function shareImage(act) {
     const sc = Math.min(box.w / spanX, box.h / spanY);
     const ox = box.x + (box.w - spanX * sc) / 2, oy = box.y + (box.h - spanY * sc) / 2;
     g.lineCap = 'round'; g.lineJoin = 'round';
-    g.shadowColor = '#c6ff3d'; g.shadowBlur = 30;
-    g.strokeStyle = '#c6ff3d'; g.lineWidth = 12;
+    g.strokeStyle = '#e8a33a'; g.lineWidth = 12;
     g.beginPath();
     pts.forEach((p, i) => { const x = ox + (p.lon - minLon) * k * sc, y = oy + (maxLat - p.lat) * sc; i ? g.lineTo(x, y) : g.moveTo(x, y); });
     g.stroke();
-    g.shadowBlur = 0;
   }
-  g.fillStyle = '#fff';
-  g.font = '700 54px system-ui, sans-serif';
+  g.fillStyle = '#e9e7e1';
+  g.font = '600 50px "IBM Plex Mono", monospace';
   g.fillText(act.name, 90, 110);
-  g.fillStyle = '#8a96a6';
-  g.font = '400 32px system-ui, sans-serif';
+  g.fillStyle = '#86847d';
+  g.font = '400 32px "IBM Plex Mono", monospace';
   g.fillText(fmtDate(act.start), 90, 960);
   const st = act.stats;
   const items = [['Afstand', `${fmtKm(st.distance)} km`], ['Tempo', `${fmtPace(st.avgPace)} /km`], ['Tijd', fmtTime(st.movingTime)]];
@@ -329,20 +328,20 @@ async function shareImage(act) {
   if (st.avgHr) items.push(['Hartslag', `${st.avgHr} bpm`]);
   items.slice(0, 3).forEach(([k2, v], i) => {
     const x = 90 + i * 320;
-    g.fillStyle = '#8a96a6'; g.font = '400 30px system-ui, sans-serif'; g.fillText(k2.toUpperCase(), x, 1060);
-    g.fillStyle = '#fff'; g.font = '800 64px system-ui, sans-serif'; g.fillText(v, x, 1140);
+    g.fillStyle = '#86847d'; g.font = '400 30px "IBM Plex Mono", monospace'; g.fillText(k2.toUpperCase(), x, 1060);
+    g.fillStyle = '#e9e7e1'; g.font = '600 64px "IBM Plex Mono", monospace'; g.fillText(v, x, 1140);
   });
   items.slice(3).forEach(([k2, v], i) => {
     const x = 90 + i * 320;
-    g.fillStyle = '#8a96a6'; g.font = '400 30px system-ui, sans-serif'; g.fillText(k2.toUpperCase(), x, 1210);
-    g.fillStyle = '#fff'; g.font = '700 48px system-ui, sans-serif'; g.fillText(v, x, 1268);
+    g.fillStyle = '#86847d'; g.font = '400 30px "IBM Plex Mono", monospace'; g.fillText(k2.toUpperCase(), x, 1210);
+    g.fillStyle = '#e9e7e1'; g.font = '500 46px "IBM Plex Mono", monospace'; g.fillText(v, x, 1268);
   });
-  g.fillStyle = '#c6ff3d'; g.font = '800 34px system-ui, sans-serif';
+  g.fillStyle = '#e8a33a'; g.font = '500 30px "IBM Plex Mono", monospace';
   g.textAlign = 'right'; g.fillText('TEMPO', W - 90, 110);
   const blob = await new Promise(r => c.toBlob(r, 'image/png'));
   const file = new File([blob], `${slug(act.name)}.png`, { type: 'image/png' });
   if (navigator.canShare?.({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: act.name, text: `${fmtKm(st.distance)} km in ${fmtTime(st.movingTime)} 🏃` }); return; } catch { /* geannuleerd */ }
+    try { await navigator.share({ files: [file], title: act.name, text: `${fmtKm(st.distance)} km in ${fmtTime(st.movingTime)}` }); return; } catch { /* geannuleerd */ }
   }
   download(file.name, blob);
 }

@@ -1,13 +1,14 @@
 // Service worker: app shell offline + kaarttegels cachen
-const VERSION = 'tempo-v1';
+const VERSION = 'tempo-v2';
 const SHELL = [
-  './', 'index.html', 'css/app.css', 'manifest.webmanifest', 'icons/icon.svg',
+  './', 'index.html', 'css/tempo.css', 'manifest.webmanifest', 'icons/icon.svg',
   'js/app.js', 'js/utils.js', 'js/db.js', 'js/settings.js', 'js/stats.js', 'js/gpx.js', 'js/strava.js',
   'js/sensors.js', 'js/workouts.js', 'js/recorder.js', 'js/charts.js', 'js/map.js', 'js/router.js',
   'js/views/record.js', 'js/views/feed.js', 'js/views/io.js', 'js/views/activity.js',
   'js/views/training.js', 'js/views/routes.js', 'js/views/profile.js',
   'vendor/leaflet/leaflet.css',
   'vendor/leaflet/leaflet.js',
+  'vendor/fonts/plex-mono-400.woff2', 'vendor/fonts/plex-mono-500.woff2', 'vendor/fonts/plex-mono-600.woff2',
 ];
 
 self.addEventListener('install', e => {

@@ -29,7 +29,7 @@ export function latlngs(points) {
 // Kleur van langzaam (blauw) naar snel (rood) via groen/geel
 export function rampColor(f) {
   f = Math.max(0, Math.min(1, f));
-  const stops = [[63, 167, 255], [61, 220, 132], [255, 210, 63], [255, 61, 90]];
+  const stops = [[125, 159, 189], [127, 174, 134], [232, 163, 58], [207, 90, 76]];
   const pos = f * (stops.length - 1);
   const i = Math.min(stops.length - 2, Math.floor(pos)), t = pos - i;
   const c = stops[i].map((v, k) => Math.round(v + (stops[i + 1][k] - v) * t));
@@ -41,7 +41,7 @@ export function coloredTrack(map, points, values, { invert = false } = {}) {
   const group = L.layerGroup().addTo(map);
   const vals = values.filter(v => v != null && isFinite(v)).sort((a, b) => a - b);
   if (!vals.length) {
-    L.polyline(latlngs(points), { color: '#c6ff3d', weight: 4 }).addTo(group);
+    L.polyline(latlngs(points), { color: '#e8a33a', weight: 4 }).addTo(group);
     return group;
   }
   const lo = vals[Math.floor(vals.length * 0.05)], hi = vals[Math.floor(vals.length * 0.95)];

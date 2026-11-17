@@ -32,10 +32,10 @@ export async function renderPrepare(view) {
       </div>
       <div id="mode-detail" class="mode-detail"></div>
       <div class="sensor-row">
-        <button class="chip ${heartRate.connected ? 'on' : ''}" id="hr-btn">❤ ${heartRate.connected ? `${esc(heartRate.device.name || 'HR')}` : 'Hartslagband'}</button>
-        <button class="chip ${s._cad ? 'on' : ''}" id="cad-btn">👟 Cadans</button>
-        <button class="chip ${s.voice ? 'on' : ''}" id="voice-btn">🔊 Stemcoach</button>
-        <button class="chip ${s.autoPause ? 'on' : ''}" id="ap-btn">⏸ Auto-pauze</button>
+        <button class="chip ${heartRate.connected ? 'on' : ''}" id="hr-btn">${heartRate.connected ? `${esc(heartRate.device.name || 'HR')}` : 'Hartslagband'}</button>
+        <button class="chip ${s._cad ? 'on' : ''}" id="cad-btn">Cadans</button>
+        <button class="chip ${s.voice ? 'on' : ''}" id="voice-btn">Stem</button>
+        <button class="chip ${s.autoPause ? 'on' : ''}" id="ap-btn">Auto-pauze</button>
       </div>
       <button class="start-btn" id="start-btn"><span>START</span></button>
     </div>
@@ -49,7 +49,7 @@ export async function renderPrepare(view) {
     routeLayer?.remove();
     const pts = setup.route?.path || setup.ghost?.points;
     if (pts?.length) {
-      routeLayer = L.polyline(latlngs(pts), { color: setup.route ? '#3fa7ff' : '#b93dff', weight: 4, opacity: 0.8, dashArray: setup.ghost ? '6 6' : null }).addTo(map);
+      routeLayer = L.polyline(latlngs(pts), { color: setup.route ? '#7d9fbd' : '#9b7bb0', weight: 4, opacity: 0.8, dashArray: setup.ghost ? '6 6' : null }).addTo(map);
       map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
       first = false;
     }
@@ -198,7 +198,7 @@ function showLive() {
           <div class="m"><div class="v" id="l-lap">--:--</div><div class="k" id="l-lap-k">Ronde 1</div></div>
         </div>
         <div class="hr-block" id="l-hr-block">
-          <div class="hr-main"><span class="heart">❤</span><span class="v" id="l-hr">--</span><span class="k" id="l-hrz"></span></div>
+          <div class="hr-main"><span class="heart"></span><span class="v" id="l-hr">--</span><span class="k" id="l-hrz"></span></div>
           <div class="zone-strip">${[1, 2, 3, 4, 5].map(z => `<i data-z="${z}" style="--c:${ZONE_COLORS[z]}"></i>`).join('')}</div>
         </div>
         <div class="grid3">
@@ -224,7 +224,7 @@ function showLive() {
     </div>
     <div class="dots" id="l-dots">${pages.map((p, i) => `<i class="${i ? '' : 'on'}" title="${p}"></i>`).join('')}</div>
     <div class="live-ctrl" id="l-ctrl"></div>
-    <div class="lock-layer" id="l-lock" hidden><div class="lock-ring" id="l-unlock"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45"/></svg><span>🔒</span></div><p>Houd vast om te ontgrendelen</p></div>
+    <div class="lock-layer" id="l-lock" hidden><div class="lock-ring" id="l-unlock"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45"/></svg><span>Slot</span></div><p>Houd vast om te ontgrendelen</p></div>
   `;
   document.body.appendChild(live);
 
@@ -238,10 +238,10 @@ function showLive() {
       mapInit = true;
       map = createMap($('#l-map', live));
       if (map) {
-        trackLine = L.polyline([], { color: '#c6ff3d', weight: 5 }).addTo(map);
+        trackLine = L.polyline([], { color: '#e8a33a', weight: 5 }).addTo(map);
         me = dotMarker(map).addTo(map);
         const rp = rec.route?.path || rec.ghost?.points;
-        if (rp) routeLine = L.polyline(latlngs(rp), { color: rec.route ? '#3fa7ff' : '#b93dff', weight: 4, opacity: 0.6, dashArray: '6 6' }).addTo(map);
+        if (rp) routeLine = L.polyline(latlngs(rp), { color: rec.route ? '#7d9fbd' : '#9b7bb0', weight: 4, opacity: 0.6, dashArray: '6 6' }).addTo(map);
         renderMap(true);
       }
     }
@@ -260,7 +260,7 @@ function showLive() {
   const renderCharts = () => {
     const ps = paceSeries(rec.points);
     lineChart($('#l-c-pace', live), { data: ps.map(p => ({ x: p.d / 1000, y: p.pace && p.pace < 900 ? p.pace : null })), invert: true, yFmt: fmtPace, xFmt: v => fmtNum(v, 1), unit: '/km', height: 120 });
-    lineChart($('#l-c-hr', live), { data: rec.points.map(p => ({ x: p.d / 1000, y: p.hr || null })), color: '#ff3d5a', xFmt: v => fmtNum(v, 1), unit: 'bpm', height: 120 });
+    lineChart($('#l-c-hr', live), { data: rec.points.map(p => ({ x: p.d / 1000, y: p.hr || null })), color: '#cf5a4c', xFmt: v => fmtNum(v, 1), unit: 'bpm', height: 120 });
     const zt = zoneTimes(rec.points, 'hr');
     $('#l-zones', live).innerHTML = hrZones().map((z, i) => `<div class="zone-row"><span class="zone-name"><i style="background:${ZONE_COLORS[i + 1]}"></i>Z${i + 1}</span><div class="zone-track"><div style="width:${zt[i] / (zt.reduce((a, b) => a + b, 0) || 1) * 100}%;background:${ZONE_COLORS[i + 1]}"></div></div><span class="zone-time">${fmtTime(zt[i])}</span></div>`).join('');
   };
@@ -276,12 +276,12 @@ function showLive() {
   const ctrl = $('#l-ctrl', live);
   const renderCtrl = () => {
     if (rec.state === 'running' || rec.state === 'autopaused') {
-      ctrl.innerHTML = `<button class="cbtn" id="c-lap">Ronde</button><button class="cbtn big pause" id="c-pause">❚❚</button><button class="cbtn" id="c-lock">🔒</button>`;
+      ctrl.innerHTML = `<button class="cbtn" id="c-lap">Ronde</button><button class="cbtn big pause" id="c-pause">❚❚</button><button class="cbtn" id="c-lock">Slot</button>`;
       $('#c-lap', ctrl).onclick = () => { rec.lap(false); renderLaps(); };
       $('#c-pause', ctrl).onclick = () => { if (rec.state === 'autopaused') { rec._mt = rec.moving; rec.state = 'paused'; rec.emit('state', 'paused'); } else rec.pause(false); };
       $('#c-lock', ctrl).onclick = () => lock(true);
     } else if (rec.state === 'paused') {
-      ctrl.innerHTML = `<button class="cbtn big resume" id="c-resume">▶ Hervat</button><button class="cbtn big stop hold" id="c-stop"><span>■ Stop</span><i></i></button>`;
+      ctrl.innerHTML = `<button class="cbtn big resume" id="c-resume">Hervat</button><button class="cbtn big stop hold" id="c-stop"><span>Houd voor stop</span><i></i></button>`;
       $('#c-resume', ctrl).onclick = () => rec.resume(false);
       holdButton($('#c-stop', ctrl), 900, () => finishRun());
     }
@@ -336,7 +336,7 @@ function showLive() {
         let paceInd = '';
         if (step.pace) {
           const status = !cp ? '' : cp < step.pace[0] ? 'fast' : cp > step.pace[1] ? 'slow' : 'ok';
-          paceInd = `<div class="target ${status}">Doel ${fmtPace(step.pace[0])}–${fmtPace(step.pace[1])} <b>${status === 'fast' ? '▼ rustiger' : status === 'slow' ? '▲ sneller' : status === 'ok' ? '✓ op tempo' : ''}</b></div>`;
+          paceInd = `<div class="target ${status}">Doel ${fmtPace(step.pace[0])}–${fmtPace(step.pace[1])} <b>${status === 'fast' ? 'rustiger' : status === 'slow' ? 'sneller' : status === 'ok' ? 'op tempo' : ''}</b></div>`;
         }
         wEl.dataset.kind = step.kind;
         wEl.innerHTML = `<div class="w-head"><span>${esc(step.label || KIND_LABEL[step.kind])}${step.rep ? ` ${step.rep}` : ''}</span><span>Stap ${rec.stepIdx + 1}/${rec.workout.steps.length}</span></div>
@@ -345,7 +345,7 @@ function showLive() {
           ${next ? `<div class="w-next">Hierna: ${esc(next.label || KIND_LABEL[next.kind])} ${next.dur.type === 'time' ? fmtTime(next.dur.value) : `${next.dur.value} m`}</div>` : ''}`;
       } else {
         wEl.dataset.kind = 'done';
-        wEl.innerHTML = '<div class="w-rem">✓ Workout klaar</div>';
+        wEl.innerHTML = '<div class="w-rem">Klaar</div>';
       }
     }
     const g = rec.ghostDelta();
@@ -360,7 +360,7 @@ function showLive() {
     if (rec.route && rp) {
       rEl.hidden = false;
       rEl.className = 'l-ghost ' + (rp.off > 60 ? 'behind' : 'ahead');
-      rEl.textContent = rp.off > 60 ? `⚠ Van de route af (${Math.round(rp.off)} m)` : `Nog ${fmtKm(rp.remaining)} km op route`;
+      rEl.textContent = rp.off > 60 ? `Van de route af (${Math.round(rp.off)} m)` : `Nog ${fmtKm(rp.remaining)} km op route`;
     }
     if (mapInit && pagesEl.scrollLeft > pagesEl.clientWidth * 0.5 && pagesEl.scrollLeft < pagesEl.clientWidth * 1.5) renderMap();
   };
@@ -420,7 +420,7 @@ function showSave(act) {
         <div><b>${fmtKm(st.distance)}</b><span>km</span></div>
         <div><b>${fmtTime(st.movingTime)}</b><span>tijd</span></div>
         <div><b>${fmtPace(st.avgPace)}</b><span>/km</span></div>
-        <div><b>${st.elevGain}</b><span>m ↑</span></div>
+        <div><b>${st.elevGain}</b><span>m stijging</span></div>
       </div>
       <label class="field"><span>Titel</span><input id="sv-name" value="${esc(act.name)}"></label>
       <label class="field"><span>Hoe ging het?</span><textarea id="sv-desc" rows="3" placeholder="Beschrijving voor jou en je Strava vrienden"></textarea></label>
@@ -476,7 +476,7 @@ function showSave(act) {
         const share = $('#sv-strava', m)?.checked;
         close();
         navigate(`#/activiteit/${act.id}${share ? '?strava=1' : ''}`);
-        toast('Run opgeslagen 🎉');
+        toast('Run opgeslagen');
       };
     },
   });

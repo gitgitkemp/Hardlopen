@@ -30,34 +30,30 @@ export async function renderFeed(view) {
     return { l: 'MDWDVZZ'[i], dist, today: startOfDay(Date.now()) === startOfDay(d0 + 3600000) };
   });
   const maxDay = Math.max(...days.map(d => d.dist), 1);
-  const R = 42, C = 2 * Math.PI * R;
   const todaySession = s.plan?.sessions.find(x => new Date(x.date).toDateString() === new Date().toDateString());
+  const now = new Date();
+  const dateLine = now.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
 
   view.innerHTML = `
-  <header class="top"><h1>Hoi ${esc(s.name.split(' ')[0])} 👋</h1><button class="icon-btn" id="imp" title="Importeren">⤓</button></header>
-  <section class="card week-card">
-    <div class="ring">
-      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" class="ring-bg"/><circle cx="50" cy="50" r="${R}" class="ring-fg" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct)}"/></svg>
-      <div class="ring-txt"><b>${fmtKm(wDist, 1)}</b><span>/ ${s.weeklyGoalKm} km</span></div>
-    </div>
-    <div class="week-info">
-      <h3>Deze week</h3>
-      <div class="kv"><span>Runs</span><b>${week.length}</b></div>
-      <div class="kv"><span>Tijd</span><b>${fmtTime(wTime)}</b></div>
-      <div class="kv"><span>Stijging</span><b>${wElev} m</b></div>
-      <div class="week-days">${days.map(d => `<div class="${d.today ? 'today' : ''}"><i style="height:${d.dist / maxDay * 100}%"></i><span>${d.l}</span></div>`).join('')}</div>
+  <header class="top"><div><span class="eyebrow">${esc(dateLine)}</span><h1>Tempo</h1></div><button class="text-btn" id="imp">Import</button></header>
+  <section class="card week">
+    <div class="eyebrow">Deze week</div>
+    <div class="week-num"><b>${fmtKm(wDist, 1)}</b><span>/ ${s.weeklyGoalKm} km</span></div>
+    <div class="line-bar"><i style="width:${pct * 100}%"></i></div>
+    <div class="week-days">${days.map(d => `<div class="${d.today ? 'today' : ''}"><i style="height:${d.dist ? Math.max(8, d.dist / maxDay * 100) : 0}%"></i><span>${d.l}</span></div>`).join('')}</div>
+    <div class="stat-grid">
+      <div><span>Runs</span><b>${week.length}</b></div>
+      <div><span>Tijd</span><b>${fmtTime(wTime)}</b></div>
+      <div><span>Stijging</span><b>${wElev} m</b></div>
+      <div><span>Reeks</span><b>${streak} ${streak === 1 ? 'week' : 'weken'}</b></div>
+      <div><span>${now.getFullYear()}</span><b>${fmtKm(yDist, 0)} km</b></div>
+      <div><span>Jaardoel</span><b class="${yDist >= yExpected ? 'up' : 'down'}">${yDist >= yExpected ? 'op schema' : `${fmtKm(yExpected - yDist, 0)} km achter`}</b></div>
     </div>
   </section>
-  <section class="row gap stat-pills">
-    <div class="pill-card"><b>🔥 ${streak}</b><span>weken streak</span></div>
-    <div class="pill-card"><b>${fmtKm(yDist, 0)}</b><span>km in ${new Date().getFullYear()} ${yDist >= yExpected ? '<em class="up">▲ op schema</em>' : '<em class="down">▼ achter</em>'}</span>
-      <div class="mini-bar"><i style="width:${Math.min(100, yDist / (s.yearGoalKm * 10))}%"></i><u style="left:${Math.min(100, yExpected / (s.yearGoalKm * 10))}%"></u></div></div>
-  </section>
-  ${todaySession ? `<a class="card today-card" href="#/rennen"><span class="tag">Vandaag op je schema</span><b>${esc(todaySession.title)}</b>${todaySession.done ? '<span class="done">✓ gedaan</span>' : '<span class="go">Start →</span>'}</a>` : ''}
+  ${todaySession ? `<a class="card today-card" href="#/rennen"><span class="eyebrow">Vandaag op je schema</span><b>${esc(todaySession.title)}</b><span class="${todaySession.done ? 'muted' : 'go'}">${todaySession.done ? 'gedaan' : 'starten'}</span></a>` : ''}
   <h2 class="section-title">Activiteiten</h2>
   <div id="feed-list">${acts.length ? acts.slice(0, 50).map(a => card(a, prs)).join('') : `
     <div class="empty">
-      <div class="empty-ico">🏃</div>
       <p>Nog geen runs. Druk op de knop onderin om je eerste run op te nemen, of importeer GPX/TCX bestanden of je Strava historie.</p>
       <div class="row gap center"><a class="btn primary" href="#/rennen">Run starten</a><a class="btn ghost" href="#/profiel">Strava importeren</a></div>
     </div>`}</div>
@@ -82,7 +78,7 @@ export function card(a, prs = {}) {
   return `<a class="card act-card" href="#/activiteit/${a.id}">
     <div class="act-head">
       <div><b>${esc(a.name)}</b><span>${fmtDate(a.start)}</span></div>
-      <div class="badges">${a.stravaId ? '<span class="badge strava" title="Op Strava">S</span>' : ''}${pr.length ? `<span class="badge pr">🏆 ${pr.length}</span>` : ''}${a.workout ? '<span class="badge">Workout</span>' : ''}</div>
+      <div class="badges">${a.workout ? '<span class="badge">workout</span>' : ''}${pr.length ? `<span class="badge pr">${pr.length} PR</span>` : ''}${a.stravaId ? '<span class="badge strava" title="Op Strava">strava</span>' : ''}</div>
     </div>
     <div class="act-body">
       <div class="act-stats">

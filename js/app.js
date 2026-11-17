@@ -36,7 +36,7 @@ async function boot() {
   // Terugkeer van Strava OAuth
   try {
     const athlete = await strava.handleRedirect();
-    if (athlete) toast(`Gekoppeld met Strava als ${athlete.firstname} 🎉`);
+    if (athlete) toast(`Gekoppeld met Strava als ${athlete.firstname}`);
   } catch (e) { toast(e.message, 5000); }
   await render();
   checkRecovery();
